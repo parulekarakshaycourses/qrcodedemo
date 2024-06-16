@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Registration</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+
+    <script>
+        $(function(){
+            $('#btnSave').click(function(){
+
+                const codeReader = new ZXing.BrowserQRCodeReader();
+                codeReader.decodeFromVideoDevice(null, 'idVideo', (result, err) => {
+                    if (result) {
+                        var beep = new Audio('/assets/audio/beep.mp3');
+                        beep.play();
+
+                        console.log('QR Code : ' + result);
+                        addStud(result);
+                    }
+                })
+
+
+            });
+        });
+
+        function addStud(qrcodeDecoded)
+        {
+            var endpoint = '/stud/save/';
+
+            var emp = {
+                name : $('#name').val(),
+                course : $('#course').val(),
+                dob : $('#dob').val(),
+                qrcode : qrcodeDecoded.toString()
+            }
+
+            axios.post(endpoint, emp)
+            .then(function(response){
+                var result = response.data;
+
+                if(result == 1)
+                {
+                    Swal.fire({
+                      title: "Student Registration Successfull",
+                      text: "Student Registration Succcessfull",
+                      icon: "success"
+                    });
+                }
+                else if(result == 2)
+                {
+                    Swal.fire({
+                      title: "Student Registration Failed",
+                      text: "Duplicate QR Code found",
+                      icon: "error"
+                    });
+                }
+                else if(result == 0)
+                {
+                    Swal.fire({
+                      title: "Student Registration Failed",
+                      text: "Something went wrong",
+                      icon: "error"
+                    });
+                }
+
+            })
+            .catch(function(error){
+                console.log(error);
+            });
+        }
+    </script>
+
+</head>
+<body>
+<h1> Student Registration Form </h1>
+
+<input type="text" id="name" placeholder="Enter Student Name"><br>
+<input type="text" id="course" placeholder="Enter Course"><br>
+<input type="date" id="dob" placeholder="Enter Student Name"><br>
+<video id="idVideo"></video>
+<button id="btnSave">REGISTER</button>
+
+<hr>
+<a href="/stud/info/"> Show Student Info </a>
+
+</body>
+</html>

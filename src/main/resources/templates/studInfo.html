@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Information</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios@1.6.7/dist/axios.min.js"></script>
+    <script type="text/javascript" src="https://unpkg.com/@zxing/library@latest"></script>
+
+    <script>
+        $(function()
+        {
+            const codeReader = new ZXing.BrowserQRCodeReader();
+            codeReader.decodeFromVideoDevice(null, 'idVideo', (result, err) => {
+                if (result) {
+
+                    var beep = new Audio('/assets/audio/beep.mp3');
+                    beep.play();
+
+                    console.log('QR Code : ' + result);
+                    findStud(result);
+                }
+            })
+        });
+
+        function findStud(qrcodeDecoded)
+        {
+            var endpoint = '/stud/find/';
+
+            var paramObj = {
+                qrcode : qrcodeDecoded.toString()
+            }
+
+            axios.post(endpoint, null, {params:paramObj})
+            .then(function(response){
+                var stud = response.data;
+
+                $('#name').html(stud.name);
+                $('#course').html(stud.course);
+                $('#dob').html(stud.dob);
+            })
+            .catch(function(error){
+                console.log(error);
+            })
+        }
+    </script>
+</head>
+<body>
+<h1> Student Information </h1>
+<h3> Scan QR Code </h3>
+<video id="idVideo"></video>
+
+<table border="1">
+    <tr>
+        <td> Name of Student </td>
+        <td id="name"> </td>
+    </tr>
+    <tr>
+        <td> Course </td>
+        <td id="course"> </td>
+    </tr>
+    <tr>
+        <td> Date Of Birth </td>
+        <td id="dob"> </td>
+    </tr>
+</table>
+
+</body>
+</html>
